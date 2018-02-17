@@ -10,19 +10,26 @@ import (
 
 func TestGetOne(t *testing.T) {
 	defer Cleanup()
-	mongo.ConnectNoAuth(dbURL)
+	sess, err := mongo.ConnectNoAuth(dbURL, dbName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbi := mongo.I{
+		DBName: dbName,
+		S:      sess,
+	}
 
 	var tm testModel
 	var result testModel
 	tm.Name = "test-get-one"
 	tm.ID = "1"
 
-	if err := mongo.Insert(&tm); err != nil {
-		log.Fatal(err)
+	if err := dbi.Insert(&tm); err != nil {
+		log.Panic(err)
 	}
 
-	if err := mongo.GetOne("1", &result); err != nil {
-		log.Fatal(err)
+	if err := dbi.GetOne("1", &result); err != nil {
+		log.Panic(err)
 	}
 
 	assert.Equal(t, tm.Name, result.Name)

@@ -12,7 +12,7 @@ func init() {
 
 func Cleanup() {
 	log.Printf("cleaning up\n")
-	connection, err := mgo.Dial("localhost")
+	connection, err := mgo.Dial(dbURL)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -21,5 +21,7 @@ func Cleanup() {
 	if err != nil {
 		log.Println(err)
 	}
+
+	log.Printf("successfully clean %s\n", dbName)
 
 }

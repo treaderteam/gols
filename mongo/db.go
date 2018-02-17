@@ -25,7 +25,7 @@ func Connect(url, name, login, pwd string) {
 		log.Fatal(err)
 	}
 	if err = session.Login(&mgo.Credential{Username: login, Password: pwd, Source: name}); err != nil {
-		ConnectNoAuth(url)
+		ConnectNoAuth(url, dbName)
 	}
 	if err = session.DB(dbName).C("users").EnsureIndexKey("email"); err != nil {
 		log.Fatal(err)
@@ -37,15 +37,14 @@ func Connect(url, name, login, pwd string) {
 }
 
 // Connect without authorization
-func ConnectNoAuth(url string) {
-	var err error
-	if session, err = mgo.Dial(connectionURL); err != nil {
-		log.Fatal(err)
+func ConnectNoAuth(url, dbName string) (sess *mgo.Session, err error) {
+	if sess, err = mgo.Dial(url); err != nil {
+		return nil, err
 	}
-	if err = session.DB(dbName).C("users").EnsureIndexKey("email"); err != nil {
-		log.Fatal(err)
+	if err = sess.DB(dbName).C("users").EnsureIndexKey("email"); err != nil {
+		return nil, err
 	}
-	log.Printf("database connection to %s established\n", connectionURL)
+	return
 }
 
 // Connects to database and returns session

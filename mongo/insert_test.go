@@ -14,12 +14,19 @@ var (
 
 func TestInsert(t *testing.T) {
 	defer Cleanup()
-	mongo.ConnectNoAuth(dbURL)
+	sess, err := mongo.ConnectNoAuth(dbURL, dbName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbi := mongo.I{
+		DBName: dbName,
+		S:      sess,
+	}
 
 	var testModel testModel
 	testModel.Name = "test"
 
-	if err := mongo.Insert(&testModel); err != nil {
+	if err = dbi.Insert(&testModel); err != nil {
 		log.Panic(err)
 	}
 

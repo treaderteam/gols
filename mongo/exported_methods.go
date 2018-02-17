@@ -21,6 +21,15 @@ func (i *I) Insert(c CollectingModificator) (err error) {
 	return
 }
 
+func (i *I) GetOne(id string, c CollectingModeller) (err error) {
+	sess := i.S.Copy()
+	defer sess.Close()
+
+	err = sess.DB(i.DBName).C(c.GetCollectionName()).Find(bson.M{"_id": id}).One(c.GetModel())
+
+	return
+}
+
 func (i *I) GetOneArbitrary(query map[string]string, c CollectingModeller) (err error) {
 	sess := i.S.Copy()
 	defer sess.Close()

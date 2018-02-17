@@ -1,5 +1,7 @@
 package mongo
 
+import "fmt"
+
 // Insert performs inserting document to database
 func Insert(c CollectingModificator) (err error) {
 	// if allowedModel := isTypeAllowed(c); !allowedModel {
@@ -10,6 +12,8 @@ func Insert(c CollectingModificator) (err error) {
 
 	sess := session.Copy()
 	defer sess.Close()
+
+	fmt.Println(dbName)
 
 	err = sess.DB(dbName).C(c.GetCollectionName()).Insert(c)
 
