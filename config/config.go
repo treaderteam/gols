@@ -5,6 +5,7 @@ package config
 import (
 	"encoding/json"
 	"flag"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -23,7 +24,9 @@ const (
 
 func init() {
 	log.SetPrefix("GOLS CONFIG: ")
+	log.Println("Gols init")
 	flag.Parse()
+	log.Println(*filepathFlag)
 
 	if *filepathFlag != "" {
 		parse(*filepathFlag)
@@ -41,13 +44,17 @@ func parse(filepath string) {
 	switch ext {
 	case EXT_JSON:
 		err = parseConfigFromJSON(filepath, config)
+		if err != nil {
+			log.Fatal(err)
+		}
 		break
 	}
 }
 
 func parseConfigFromJSON(filepath string, dest interface{}) (err error) {
 	var (
-		file *os.File
+		file   *os.File
+		entity []byte
 	)
 
 	if file, err = os.Open(filepath); err != nil {
@@ -56,7 +63,11 @@ func parseConfigFromJSON(filepath string, dest interface{}) (err error) {
 
 	defer file.Close()
 
-	if err = json.NewDecoder(file).Decode(dest); err != nil {
+	if entity, err = ioutil.ReadAll(file); err != nil {
+		log.Fatal(err)
+	}
+
+	if err = json.Unmarshal(entity, &config); err != nil {
 		return
 	}
 
