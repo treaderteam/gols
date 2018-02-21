@@ -47,6 +47,34 @@ func ConnectNoAuth(url, dbName string) (sess *mgo.Session, err error) {
 	return
 }
 
+// ConnectN new connection
+func ConnectN(url, dbName string) (result I, err error) {
+	var sess *mgo.Session
+	if sess, err = mgo.Dial(url); err != nil {
+		return
+	}
+
+	result = I{
+		DBName: dbName,
+		S:      sess,
+	}
+
+	return
+}
+
+// ConnectNAuth new secure connection
+func ConnectNAuth(url, dbName, login, pwd string) (result I, err error) {
+	if result, err = ConnectN(url, dbName); err != nil {
+		return
+	}
+
+	if err = result.S.Login(&mgo.Credential{Username: login, Password: pwd, Source: dbName}); err != nil {
+		return
+	}
+
+	return
+}
+
 // Connects to database and returns session
 func PerformConnection(url, login, pwd, dbname string) (s *mgo.Session, e error) {
 	if s, e = mgo.Dial(url); e != nil {
