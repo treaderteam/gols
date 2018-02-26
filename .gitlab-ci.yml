@@ -1,6 +1,6 @@
 image: alpine
 
-install:
+before_script:
   - apk add curl --no-cache
 
 Trigger godeps:
