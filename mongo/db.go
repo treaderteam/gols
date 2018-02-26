@@ -68,6 +68,8 @@ func ConnectNAuth(url, dbName, login, pwd string) (result I, err error) {
 		return
 	}
 
+	fmt.Printf("login with %s %s, %s\n", url, login, pwd)
+
 	if err = result.S.Login(&mgo.Credential{Username: login, Password: pwd, Source: dbName}); err != nil {
 		return
 	}
