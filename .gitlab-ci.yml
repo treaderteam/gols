@@ -1,4 +1,7 @@
-image: byrnedo/alpine-curl
+image: alpine
+
+install:
+  - apk add curl --no-cache
 
 Trigger godeps:
   script:
