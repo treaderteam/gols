@@ -21,6 +21,11 @@ type ErrorHandler interface {
 	HandleError(err *error, rw http.ResponseWriter)
 }
 
+// HeadersResolver return required headers to add to response
+type HeadersResolver interface {
+	ResolveHeaders() http.Header
+}
+
 // Parametrer must return pointer to required params
 type Parametrer interface {
 	GetParams() Params
@@ -30,4 +35,3 @@ type Parametrer interface {
 type Logger interface {
 	Log(status *int, method string, url *url.URL, start *time.Time)
 }
-

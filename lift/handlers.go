@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"strings"
 	"time"
 )
 
@@ -34,13 +35,14 @@ type instance struct {
 }
 
 type route struct {
-	Path         string
-	Method       string
-	Params       Parametrer
-	Resolver     Resolver
-	CORSResolver CORSResolver
-	ErrorHandler ErrorHandler
-	Logger       Logger
+	Path            string
+	Method          string
+	Params          Parametrer
+	Resolver        Resolver
+	CORSResolver    CORSResolver
+	ErrorHandler    ErrorHandler
+	Logger          Logger
+	ResponseHeaders HeadersResolver
 }
 
 func New() Instance {
@@ -52,7 +54,7 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		err      error
 		response interface{}
 		res      []byte
-		ps Params
+		ps       Params
 	)
 
 	responseStatus := 500
@@ -69,8 +71,7 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		}(&err)
 	} else {
 		defer func(e *error) {
-			if _e := recover();
-				_e != nil {
+			if _e := recover(); _e != nil {
 				log.Println(_e)
 			}
 			if (*e) != nil {
@@ -102,7 +103,6 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 	if ro.Params != nil {
 		ps = ro.Params.GetParams()
 	}
-
 
 	defer r.Body.Close()
 
@@ -137,6 +137,13 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		responseStatus, response, err = ro.Resolver.Resolve()
 	}
 
+	if ro.ResponseHeaders != nil {
+		headers := ro.ResponseHeaders.ResolveHeaders()
+		for n, v := range headers {
+			rw.Header().Add(n, strings.Join(v, ","))
+		}
+	}
+
 	if err != nil {
 		return
 	}
@@ -146,8 +153,7 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if res, err = json.Marshal(response);
-		err != nil {
+	if res, err = json.Marshal(response); err != nil {
 		responseStatus = 500
 		return
 	}
