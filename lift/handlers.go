@@ -87,7 +87,7 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	defer func(writer *http.ResponseWriter, method string, url *url.URL, s *time.Time, status *int) {
-		if (*status) != 200 {
+		if (*status) != 200 && (*status) != 204 {
 			(*writer).WriteHeader(*status)
 		}
 	}(&rw, r.Method, r.URL, &start, &responseStatus)
@@ -157,6 +157,7 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
+		responseStatus = 500
 		return
 	}
 
