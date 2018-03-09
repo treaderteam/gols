@@ -179,7 +179,6 @@ func (i *Instance) Register(r Route) {
 
 func (i Instance) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	check := r.Method + " " + r.URL.Path
-	log.Printf("%s : %+v\n", check, r)
 	for p, ro := range i.routes {
 		pattern := ro.Method + " " + p
 		if ok, err := path.Match(pattern, check); ok && err == nil {
