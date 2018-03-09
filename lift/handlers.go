@@ -20,12 +20,14 @@ type Route route
 
 type Params struct {
 	QueryParams *map[string]string
+	Headers     *map[string]string
 	Body        interface{}
 }
 
 func (p Params) New() Params {
 	return Params{
 		QueryParams: new(map[string]string),
+		Headers:     new(map[string]string),
 		Body:        nil,
 	}
 }
@@ -63,7 +65,7 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 	if ro.ErrorHandler != nil {
 		defer func(e *error) {
 			if _e := recover(); _e != nil {
-				*e = errors.New(fmt.Sprintf("panic happened %+v\n", _e))
+				*e = fmt.Errorf("panic happened %+v", _e)
 				ro.ErrorHandler.HandleError(e, rw)
 			} else if (*e) != nil {
 				ro.ErrorHandler.HandleError(e, rw)
@@ -94,10 +96,9 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		if ro.CORSResolver != nil {
 			responseStatus = ro.CORSResolver.ResolveCORS(rw)
 			return
-		} else {
-			err = errors.New("got cors request, but resolver not specified")
-			return
 		}
+		err = errors.New("got cors request, but resolver not specified")
+		return
 	}
 
 	if ro.Params != nil {
@@ -119,6 +120,17 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 				return
 			}
 			(*ps.QueryParams)[v] = value
+		}
+	}
+
+	if ps.Headers != nil {
+		for v := range *ps.Headers {
+			value := r.Header.Get(v)
+			if len(value) < 1 {
+				err = errors.New("not enough query params")
+				return
+			}
+			(*ps.Headers)[v] = value
 		}
 	}
 
@@ -167,12 +179,19 @@ func (i *Instance) Register(r Route) {
 
 func (i Instance) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	check := r.Method + " " + r.URL.Path
+	log.Printf("%s : %+v\n", check, r)
 	for p, ro := range i.routes {
 		pattern := ro.Method + " " + p
 		if ok, err := path.Match(pattern, check); ok && err == nil {
 			ro.serve(w, r)
 			return
 		}
+		pattern = "OPTIONS " + p
+		if ok, err := path.Match(pattern, check); ok && err == nil {
+			ro.serve(w, r)
+			return
+		}
+
 	}
 
 	http.NotFound(w, r)
