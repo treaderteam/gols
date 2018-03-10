@@ -140,9 +140,18 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err = json.NewDecoder(bytes.NewReader(b)).Decode(ps.Body); err != nil {
-			return
+		switch ps.Body.(type) {
+		case []byte:
+			ps.Body = b
+			break
+		default:
+
+			if err = json.NewDecoder(bytes.NewReader(b)).Decode(ps.Body); err != nil {
+				return
+			}
+			break
 		}
+
 	}
 
 	if ro.Resolver != nil {
