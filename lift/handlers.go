@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"path"
 	"strings"
 	"time"
 )
@@ -117,6 +116,7 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 			value := r.URL.Query().Get(v)
 			if len(value) < 1 {
 				err = errors.New("not enough query params")
+				responseStatus = 400
 				return
 			}
 			(*ps.QueryParams)[v] = value
@@ -185,25 +185,6 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 
 func (i *Instance) Register(r Route) {
 	i.routes[r.Path] = r
-}
-
-func (i Instance) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	check := r.Method + " " + r.URL.Path
-	for p, ro := range i.routes {
-		pattern := ro.Method + " " + p
-		if ok, err := path.Match(pattern, check); ok && err == nil {
-			ro.serve(w, r)
-			return
-		}
-		pattern = "OPTIONS " + p
-		if ok, err := path.Match(pattern, check); ok && err == nil {
-			ro.serve(w, r)
-			return
-		}
-
-	}
-
-	http.NotFound(w, r)
 }
 
 func (i *Instance) Kindle() *http.ServeMux {
