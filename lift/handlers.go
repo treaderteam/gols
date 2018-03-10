@@ -141,8 +141,9 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		}
 
 		switch ps.Body.(type) {
-		case []byte:
-			ps.Body = b
+		case *[]byte:
+			_p := ps.Body.(*[]byte)
+			*_p = b
 			break
 		default:
 
