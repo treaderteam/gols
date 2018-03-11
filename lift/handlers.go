@@ -44,6 +44,7 @@ type route struct {
 	ErrorHandler    ErrorHandler
 	Logger          Logger
 	ResponseHeaders HeadersResolver
+	DetailedLogger  bool
 }
 
 func New() Instance {
@@ -81,8 +82,18 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		}(&err)
 	}
 
-	if ro.Logger != nil {
-		defer ro.Logger.Log(&responseStatus, r.Method, r.URL, &start)
+	if ro.DetailedLogger {
+		defer func(req *http.Request, status *int, s *time.Time) {
+			log.Printf("|%+v\n|%+v\n|%s [%d] [%s]\n", req.Header, req.URL.Query(), req.URL.Path, *status, time.Since(*s))
+		}(r, &responseStatus, &start)
+	} else {
+		if ro.Logger != nil {
+			defer ro.Logger.Log(&responseStatus, r.Method, r.URL, &start)
+		} else {
+			defer func(status *int, method string, u *url.URL, s *time.Time) {
+				log.Printf("%s [%s] %d %s\n", u.Path, method, *status, time.Since(*s))
+			}(&responseStatus, r.Method, r.URL, &start)
+		}
 	}
 
 	defer func(writer *http.ResponseWriter, method string, url *url.URL, s *time.Time, status *int) {
