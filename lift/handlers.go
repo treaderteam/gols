@@ -138,8 +138,12 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		for v := range *ps.Headers {
 			value := r.Header.Get(v)
 			if len(value) < 1 {
-				err = errors.New("not enough query params")
-				return
+				v = strings.ToLower(v)
+				value := r.Header.Get(v)
+				if len(value) < 1 {
+					err = errors.New("not enough query params")
+					return
+				}
 			}
 			(*ps.Headers)[v] = value
 		}
