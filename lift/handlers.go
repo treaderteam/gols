@@ -53,10 +53,11 @@ func New() Instance {
 
 func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 	var (
-		err      error
-		response interface{}
-		res      []byte
-		ps       Params
+		err         error
+		response    interface{}
+		res         []byte
+		ps          Params
+		clientError bool
 	)
 
 	responseStatus := 500
@@ -96,11 +97,16 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	defer func(writer *http.ResponseWriter, method string, url *url.URL, s *time.Time, status *int) {
+	defer func(writer *http.ResponseWriter, method string, url *url.URL, s *time.Time, status *int, err *error) {
+		log.Printf("%d \n", *status)
 		if (*status) != 200 && (*status) != 204 {
-			(*writer).WriteHeader(*status)
+			if clientError {
+				http.Error(*writer, (*err).Error(), *status)
+			} else {
+				(*writer).WriteHeader(*status)
+			}
 		}
-	}(&rw, r.Method, r.URL, &start, &responseStatus)
+	}(&rw, r.Method, r.URL, &start, &responseStatus, &err)
 
 	if r.Method == http.MethodOptions {
 		if ro.CORSResolver != nil {
@@ -119,6 +125,8 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 
 	if r.Method != ro.Method {
 		responseStatus = http.StatusMethodNotAllowed
+		clientError = true
+		err = fmt.Errorf("method %s not allowed an such endpoint", r.Method)
 		return
 	}
 
@@ -127,6 +135,7 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 			value := r.URL.Query().Get(v)
 			if len(value) < 1 {
 				err = errors.New("not enough query params")
+				clientError = true
 				responseStatus = 400
 				return
 			}
@@ -141,7 +150,9 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 				v = strings.ToLower(v)
 				value := r.Header.Get(v)
 				if len(value) < 1 {
-					err = errors.New("not enough query params")
+					clientError = true
+					responseStatus = 400
+					err = errors.New("not enough headers")
 					return
 				}
 			}

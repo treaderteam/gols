@@ -80,8 +80,9 @@ func TestPrepare(t *testing.T) {
 
 func TestHandlers(t *testing.T) {
 	r, _ := http.Get("http://localhost:8080/test?name=tester&surname=testerov")
-	defer r.Body.Close()
 	res, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
 	assert.Equal(t, 200, r.StatusCode)
 	assert.Equal(t, "\"hello, tester testerov!\\n\"", string(res))
 	t.Logf("%s\n", string(res))
