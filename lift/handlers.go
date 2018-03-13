@@ -45,6 +45,7 @@ type route struct {
 	Logger          Logger
 	ResponseHeaders HeadersResolver
 	DetailedLogger  bool
+	DontMarshal     bool
 }
 
 func New() Instance {
@@ -202,9 +203,13 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if res, err = json.Marshal(response); err != nil {
-		responseStatus = 500
-		return
+	if !ro.DontMarshal {
+		if res, err = json.Marshal(response); err != nil {
+			responseStatus = 500
+			return
+		}
+	} else {
+		res = response.([]byte)
 	}
 
 	rw.Write(res)
