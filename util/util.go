@@ -45,7 +45,7 @@ func CORSPOSTHandler(rw http.ResponseWriter) int {
 
 // ConnectToBookkeeper func
 func ConnectToBookkeeper(address string) (c bookkeeper.BookkeeperClient, conn *grpc.ClientConn, err error) {
-
+	log.Printf("dialing %s\n", address)
 	conn, err = grpc.Dial(address, grpc.WithInsecure(), grpc.WithMaxMsgSize(10000000))
 	defer func(e *error) {
 		if *e != nil {
@@ -62,7 +62,7 @@ func ConnectToBookkeeper(address string) (c bookkeeper.BookkeeperClient, conn *g
 
 // ConnectToUserrer func
 func ConnectToUserrer(address string) (c userrer.UserrerClient, conn *grpc.ClientConn, err error) {
-
+	log.Printf("dialing %s\n", address)
 	conn, err = grpc.Dial(address, grpc.WithInsecure())
 	defer func(e *error) {
 		if *e != nil {
@@ -79,7 +79,7 @@ func ConnectToUserrer(address string) (c userrer.UserrerClient, conn *grpc.Clien
 
 // ConnectToLogserver func
 func ConnectToLogserver(address string) (c logserver.LogserverClient, conn *grpc.ClientConn, err error) {
-
+	log.Printf("dialing %s\n", address)
 	conn, err = grpc.Dial(address, grpc.WithInsecure(), grpc.WithMaxMsgSize(10000000))
 	defer func(e *error) {
 		if *e != nil {
@@ -96,7 +96,7 @@ func ConnectToLogserver(address string) (c logserver.LogserverClient, conn *grpc
 
 // ConnectToAccounter func
 func ConnectToAccounter(address string) (c accounter.AccounterClient, conn *grpc.ClientConn, err error) {
-
+	log.Printf("dialing %s\n", address)
 	conn, err = grpc.Dial(address, grpc.WithInsecure())
 	defer func(e *error) {
 		if *e != nil {
