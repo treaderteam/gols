@@ -43,6 +43,15 @@ func (i *I) GetOneArbitrary(query map[string]string, c CollectingModeller) (err 
 	return
 }
 
+func (i *I) GetIn(c interface{}, in []string, modelname string) (err error) {
+	sess := i.S.Copy()
+	defer sess.Close()
+
+	err = sess.DB(i.DBName).C(modelname).Find(bson.M{"_id": bson.M{"$in": in}}).All(c)
+
+	return
+}
+
 func (i *I) GetAll(c interface{}, modelname string) (err error) {
 
 	sess := i.S.Copy()
