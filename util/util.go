@@ -7,6 +7,8 @@ import (
 	"net/url"
 	"time"
 
+	"gitlab.com/alexnikita/translator/trapi"
+
 	"golang.org/x/net/context"
 
 	"gitlab.com/alexnikita/gols/config"
@@ -108,6 +110,23 @@ func ConnectToAccounter(address string) (c accounter.AccounterClient, conn *grpc
 	}
 
 	c = accounter.NewAccounterClient(conn)
+	return
+}
+
+// ConnectToTranslator func
+func ConnectToTranslator(address string) (c trapi.TranslatorClient, conn *grpc.ClientConn, err error) {
+	log.Printf("dialing %s\n", address)
+	conn, err = grpc.Dial(address, grpc.WithInsecure())
+	defer func(e *error) {
+		if *e != nil {
+			log.Println(*e)
+		}
+	}(&err)
+	if err != nil {
+		return
+	}
+
+	c = trapi.NewTranslatorClient(conn)
 	return
 }
 
