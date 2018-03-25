@@ -2,7 +2,7 @@
 package filetype
 
 import (
-	"github.com/centrypoint/fb2"
+	"io"
 
 	"gitlab.com/alexnikita/gols/filetype/types"
 )
@@ -20,6 +20,17 @@ func Detect(file []byte) types.Type {
 	}
 
 	return types.Unknown
+}
+
+// DetectFromReader get type from reader
+func DetectFromReader(rdr io.Reader) (types.Type, []byte, error) {
+	buf := make([]byte, 58)
+	_, err := rdr.Read(buf)
+	if err != nil {
+		return types.Unknown, nil, err
+	}
+
+	return Detect(buf), buf, nil
 }
 
 // check if file is epub
@@ -44,10 +55,8 @@ func isPDF(buf []byte) bool {
 
 // check if file is fb2
 func isFB2(buf []byte) bool {
-	f := fb2.New(buf)
-	_, err := f.Unmarshal()
-	if err != nil {
+	if len(buf) < 51 {
 		return false
 	}
-	return true
+	return string(buf[40:51]) == "FictionBook"
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -21,6 +22,7 @@ type Params struct {
 	QueryParams *map[string]string
 	Headers     *map[string]string
 	Body        interface{}
+	BodyRaw     *io.ReadCloser
 }
 
 func (p Params) New() Params {
@@ -28,6 +30,7 @@ func (p Params) New() Params {
 		QueryParams: new(map[string]string),
 		Headers:     new(map[string]string),
 		Body:        nil,
+		BodyRaw:     nil,
 	}
 }
 
@@ -122,8 +125,6 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		ps = ro.Params.GetParams()
 	}
 
-	defer r.Body.Close()
-
 	if r.Method != ro.Method {
 		responseStatus = http.StatusMethodNotAllowed
 		clientError = true
@@ -179,7 +180,12 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 			}
 			break
 		}
+		r.Body.Close()
+	}
 
+	if ps.BodyRaw != nil {
+		br := ps.BodyRaw
+		*br = r.Body
 	}
 
 	if ro.Resolver != nil {
@@ -195,11 +201,6 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		responseStatus = 500
-		return
-	}
-
-	if response == nil {
-		responseStatus = 204
 		return
 	}
 
