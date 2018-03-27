@@ -3,6 +3,7 @@ package filetype
 
 import (
 	"io"
+	"log"
 
 	"gitlab.com/alexnikita/gols/filetype/types"
 )
@@ -25,8 +26,9 @@ func Detect(file []byte) types.Type {
 // DetectFromReader get type from reader
 func DetectFromReader(rdr io.Reader) (types.Type, []byte, error) {
 	buf := make([]byte, 58)
-	_, err := rdr.Read(buf)
+	readed, err := rdr.Read(buf)
 	if err != nil {
+		log.Println(err, readed)
 		return types.Unknown, nil, err
 	}
 
