@@ -45,8 +45,6 @@ func (p *Parser) Unmarshal() (result FB2, err error) {
 			return
 		}
 
-		result.UnmarshalCoverpage(p.book)
-
 		return
 	}
 	reader := bytes.NewReader(p.book)
@@ -55,8 +53,6 @@ func (p *Parser) Unmarshal() (result FB2, err error) {
 	if err = decoder.Decode(&result); err != nil {
 		return
 	}
-
-	result.UnmarshalCoverpage(p.book)
 
 	return
 }

@@ -23,11 +23,9 @@ type FB2 struct {
 			Annotation string       `xml:"annotation" bson:"annotation"`
 			Keywords   string       `xml:"keywords" bson:"keywords"`
 			Date       string       `xml:"date" bson:"date"`
-			Coverpage  struct {
-				Image struct {
-					Href string `xml:"xlink:href,attr" bson:"href"`
-				} `xml:"image,allowempty" bson:"image"`
-			} `xml:"coverpage" bson:"coverpage"`
+			Coverpage  []struct {
+				Href string `xml:"href,attr" bson:"href"`
+			} `xml:"coverpage>image" bson:"coverpage"`
 			Lang       string     `xml:"lang" bson:"lang"`
 			SrcLang    string     `xml:"src-lang" bson:"src-lang"`
 			Translator AuthorType `xml:"translator" bson:"translator"`
@@ -69,41 +67,41 @@ type FB2 struct {
 
 // UnmarshalCoverpage func
 func (f *FB2) UnmarshalCoverpage(data []byte) {
-	tagOpened := false
-	coverpageStartIndex := 0
-	coverpageEndIndex := 0
-	// imageHref := ""
-	tagName := ""
-_loop:
-	for i, v := range data {
-		if tagOpened {
-			switch v {
-			case '>':
-				if tagName != "p" && tagName != "/p" {
-				}
-				tagOpened = false
-				if tagName == "coverpage" {
-					coverpageStartIndex = i + 1
-				} else if tagName == "/coverpage" {
-					coverpageEndIndex = i - 11
-					break _loop
-				}
-				tagName = ""
-				break
-			default:
-				tagName += string(v)
-			}
-		} else {
-			if v == '<' {
-				tagOpened = true
-			}
-		}
-	}
+	// 	tagOpened := false
+	// 	coverpageStartIndex := 0
+	// 	coverpageEndIndex := 0
+	// 	// imageHref := ""
+	// 	tagName := ""
+	// _loop:
+	// 	for i, v := range data {
+	// 		if tagOpened {
+	// 			switch v {
+	// 			case '>':
+	// 				if tagName != "p" && tagName != "/p" {
+	// 				}
+	// 				tagOpened = false
+	// 				if tagName == "coverpage" {
+	// 					coverpageStartIndex = i + 1
+	// 				} else if tagName == "/coverpage" {
+	// 					coverpageEndIndex = i - 11
+	// 					break _loop
+	// 				}
+	// 				tagName = ""
+	// 				break
+	// 			default:
+	// 				tagName += string(v)
+	// 			}
+	// 		} else {
+	// 			if v == '<' {
+	// 				tagOpened = true
+	// 			}
+	// 		}
+	// 	}
 
-	if coverpageEndIndex > coverpageStartIndex {
-		href := parseImage(data[coverpageStartIndex:coverpageEndIndex])
-		f.Description.TitleInfo.Coverpage.Image.Href = href
-	}
+	// 	if coverpageEndIndex > coverpageStartIndex {
+	// 		href := parseImage(data[coverpageStartIndex:coverpageEndIndex])
+	// 		f.Description.TitleInfo.Coverpage.Image.Href = href
+	// 	}
 }
 
 // AuthorType embedded fb2 type, represents author info
