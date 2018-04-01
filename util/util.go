@@ -48,7 +48,7 @@ func CORSPOSTHandler(rw http.ResponseWriter) int {
 // ConnectToBookkeeper func
 func ConnectToBookkeeper(address string) (c bookkeeper.BookkeeperClient, conn *grpc.ClientConn, err error) {
 	log.Printf("dialing %s\n", address)
-	conn, err = grpc.Dial(address, grpc.WithInsecure(), grpc.WithMaxMsgSize(10000000))
+	conn, err = grpc.Dial(address, grpc.WithInsecure())
 	defer func(e *error) {
 		if *e != nil {
 			log.Println(*e)

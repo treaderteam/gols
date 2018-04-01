@@ -5,12 +5,46 @@ import (
 	"bytes"
 	"encoding/xml"
 	"io"
+	"io/ioutil"
+
+	"gitlab.com/alexnikita/gols/xmlreader"
 )
 
 // Parser struct
 type Parser struct {
 	book   []byte
 	reader io.Reader
+}
+
+// GetWords from fb2
+func (p *Parser) GetWords() (map[string]string, error) {
+	var (
+		data []byte
+		err  error
+	)
+
+	data = p.book
+
+	if p.reader != nil {
+		data, err = ioutil.ReadAll(p.reader)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	words, err := xmlreader.GetWordsFromXMLBody(data)
+
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]string)
+
+	for _, v := range words {
+		result[v] = v
+	}
+
+	return result, nil
 }
 
 // New creates new Parser
