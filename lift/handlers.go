@@ -1,7 +1,6 @@
 package lift
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +11,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"gitlab.com/alexnikita/gols/lift/lifterr"
 )
 
 type Instance instance
@@ -128,7 +129,7 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 	if r.Method != ro.Method {
 		responseStatus = http.StatusMethodNotAllowed
 		clientError = true
-		err = fmt.Errorf("method %s not allowed an such endpoint", r.Method)
+		err = fmt.Errorf("method %s not allowed at such endpoint", r.Method)
 		return
 	}
 
@@ -174,8 +175,11 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 			*_p = b
 			break
 		default:
-
-			if err = json.NewDecoder(bytes.NewReader(b)).Decode(ps.Body); err != nil {
+			if err = json.Unmarshal(b, ps.Body); err != nil {
+				log.Println(err)
+				clientError = true
+				responseStatus = 400
+				err = fmt.Errorf("cannot parse input value, you probably sending data in incorrect format : %s", err.Error())
 				return
 			}
 			break
@@ -200,8 +204,14 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		responseStatus = 500
-		return
+		switch err.(type) {
+		case lifterr.LiftClientError:
+			responseStatus = 400
+			clientError = true
+			return
+		default:
+			return
+		}
 	}
 
 	if !ro.DontMarshal {
