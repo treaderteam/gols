@@ -4,38 +4,23 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
+
+	"gitlab.com/alexnikita/gols/gol"
+
+	"gitlab.com/alexnikita/gols/lift/luftil"
 
 	"gitlab.com/alexnikita/gols/lift/lifterr"
 )
 
-type Instance instance
-
-type Route route
-
-type Params struct {
-	QueryParams *map[string]string
-	Headers     *map[string]string
-	Body        interface{}
-	BodyRaw     *io.ReadCloser
-}
-
-func (p Params) New() Params {
-	return Params{
-		QueryParams: new(map[string]string),
-		Headers:     new(map[string]string),
-		Body:        nil,
-		BodyRaw:     nil,
-	}
-}
-
 type instance struct {
+	prefix string
 	routes map[string]Route
 }
 
@@ -50,10 +35,6 @@ type route struct {
 	ResponseHeaders HeadersResolver
 	DetailedLogger  bool
 	DontMarshal     bool
-}
-
-func New() Instance {
-	return Instance{routes: make(map[string]Route)}
 }
 
 func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
@@ -82,15 +63,14 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 			if _e := recover(); _e != nil {
 				log.Println(_e)
 			}
-			if (*e) != nil {
-				log.Println(*e)
-			}
 		}(&err)
 	}
 
 	if ro.DetailedLogger {
 		defer func(req *http.Request, status *int, s *time.Time) {
-			log.Printf("|%+v\n|%+v\n|%s [%d] [%s]\n", req.Header, req.URL.Query(), req.URL.Path, *status, time.Since(*s))
+			stat := luftil.ColorizeStatus(strconv.Itoa(*status))
+			path := gol.Cyan(req.URL.Path)
+			log.Printf("\n|%+v\n|%+v\n|%s [%s] [%s]\n", req.Header, req.URL.Query(), path, stat, time.Since(*s))
 		}(r, &responseStatus, &start)
 	} else {
 		if ro.Logger != nil {
@@ -103,7 +83,6 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	defer func(writer *http.ResponseWriter, method string, url *url.URL, s *time.Time, status *int, err *error) {
-		log.Printf("%d \n", *status)
 		if (*status) != 200 && (*status) != 204 {
 			if clientError {
 				http.Error(*writer, (*err).Error(), *status)
@@ -124,13 +103,6 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 
 	if ro.Params != nil {
 		ps = ro.Params.GetParams()
-	}
-
-	if r.Method != ro.Method {
-		responseStatus = http.StatusMethodNotAllowed
-		clientError = true
-		err = fmt.Errorf("method %s not allowed at such endpoint", r.Method)
-		return
 	}
 
 	if ps.QueryParams != nil {
@@ -224,13 +196,4 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	rw.Write(res)
-}
-
-func (i *Instance) Register(r Route) {
-	i.routes[r.Path] = r
-}
-
-func (i *Instance) Kindle() *http.ServeMux {
-	mux := http.NewServeMux()
-	return mux
 }

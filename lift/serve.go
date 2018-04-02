@@ -6,7 +6,8 @@ import (
 )
 
 func (i Instance) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	check := r.Method + " " + r.URL.Path
+	url := r.URL.Path
+	check := r.Method + " " + url
 	for p, ro := range i.routes {
 		pattern := ro.Method + " " + p
 		if ok, err := path.Match(pattern, check); ok && err == nil {
