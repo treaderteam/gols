@@ -191,9 +191,14 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 			responseStatus = 500
 			return
 		}
+		rw.Write(res)
 	} else {
-		res = response.([]byte)
+		if res == nil {
+			rw.WriteHeader(responseStatus)
+		} else {
+			res = response.([]byte)
+			rw.Write(res)
+		}
 	}
 
-	rw.Write(res)
 }
