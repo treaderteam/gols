@@ -2,4 +2,16 @@
 // exterience than first version
 package liftv2
 
-// instance is liftv2 instance
+// Instance is liftv2 instance
+type Instance instance
+
+// Route is navigational point
+type Route struct {
+	Path   string
+	Method string
+}
+
+// instance real type
+type instance struct {
+	routes map[string]string
+}

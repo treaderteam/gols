@@ -44,6 +44,7 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		res         []byte
 		ps          Params
 		clientError bool
+		responded   bool
 	)
 
 	responseStatus := 500
@@ -86,7 +87,7 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		if (*status) != 200 && (*status) != 204 {
 			if clientError {
 				http.Error(*writer, (*err).Error(), *status)
-			} else {
+			} else if !responded {
 				(*writer).WriteHeader(*status)
 			}
 		}
@@ -193,12 +194,15 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		}
 		rw.Write(res)
 	} else {
-		if res == nil {
+		if response == nil {
+			log.Println("write header")
 			rw.WriteHeader(responseStatus)
 		} else {
 			res = response.([]byte)
+			log.Println(len(res))
 			rw.Write(res)
 		}
 	}
 
+	responded = true
 }
