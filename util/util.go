@@ -16,6 +16,7 @@ import (
 	accounter "gitlab.com/alexnikita/accounter/api"
 	bookkeeper "gitlab.com/alexnikita/bookkeeper/api"
 	logserver "gitlab.com/alexnikita/logserver/lapi"
+	bot "gitlab.com/alexnikita/treaderbot/api"
 	userrer "gitlab.com/alexnikita/userrer/api"
 	"google.golang.org/grpc"
 )
@@ -127,6 +128,23 @@ func ConnectToTranslator(address string) (c trapi.TranslatorClient, conn *grpc.C
 	}
 
 	c = trapi.NewTranslatorClient(conn)
+	return
+}
+
+// ConnectToBot func
+func ConnectToBot(address string) (c bot.TreaderbotClient, conn *grpc.ClientConn, err error) {
+	log.Printf("dialing %s\n", address)
+	conn, err = grpc.Dial(address, grpc.WithInsecure())
+	defer func(e *error) {
+		if *e != nil {
+			log.Println(*e)
+		}
+	}(&err)
+	if err != nil {
+		return
+	}
+
+	c = bot.NewTreaderbotClient(conn)
 	return
 }
 
