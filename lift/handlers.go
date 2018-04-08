@@ -45,7 +45,10 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		ps          Params
 		clientError bool
 		responded   bool
+		params      Params
 	)
+
+	params = params.New()
 
 	responseStatus := 500
 	start := time.Now()
@@ -115,8 +118,7 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 				responseStatus = 400
 				return
 			}
-			log.Printf("about to write query %s\n", time.Now())
-			(*ps.QueryParams)[v] = value
+			(*params.QueryParams)[v] = value
 		}
 	}
 
@@ -133,8 +135,7 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 					return
 				}
 			}
-			log.Printf("about to write header %s %s\n", value, time.Now())
-			(*ps.Headers)[v] = value
+			(*params.Headers)[v] = value
 		}
 	}
 
@@ -146,11 +147,13 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 
 		switch ps.Body.(type) {
 		case *[]byte:
-			_p := ps.Body.(*[]byte)
+			params.Body = new([]byte)
+			_p := params.Body.(*[]byte)
 			*_p = b
 			break
 		default:
-			if err = json.Unmarshal(b, ps.Body); err != nil {
+			params.Body = ps.Body
+			if err = json.Unmarshal(b, params.Body); err != nil {
 				log.Println(err)
 				clientError = true
 				responseStatus = 400
@@ -168,7 +171,10 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if ro.Resolver != nil {
-		responseStatus, response, err = ro.Resolver.Resolve()
+		responseStatus, response, err = ro.Resolver.Resolve(params)
+		if responseStatus == 500 {
+			log.Println(err)
+		}
 	}
 
 	if ro.ResponseHeaders != nil {
@@ -197,11 +203,9 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		rw.Write(res)
 	} else {
 		if response == nil {
-			log.Println("write header")
 			rw.WriteHeader(responseStatus)
 		} else {
 			res = response.([]byte)
-			log.Println(len(res))
 			rw.Write(res)
 		}
 	}

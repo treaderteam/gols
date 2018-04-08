@@ -34,8 +34,8 @@ type Params struct {
 // New create new params
 func (p Params) New() Params {
 	return Params{
-		QueryParams: new(map[string]string),
-		Headers:     new(map[string]string),
+		QueryParams: &map[string]string{},
+		Headers:     &map[string]string{},
 		Body:        nil,
 		BodyRaw:     nil,
 	}

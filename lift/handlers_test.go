@@ -26,7 +26,7 @@ type getTest struct {
 	params lift.Params
 }
 
-func (g getTest) Resolve() (status int, response interface{}, err error) {
+func (g getTest) Resolve(ps lift.Params) (status int, response interface{}, err error) {
 	status = 200
 	err = nil
 	response = fmt.Sprintf("hello, %s %s!\n", (*g.params.QueryParams)["name"], (*g.params.QueryParams)["surname"])
@@ -41,7 +41,7 @@ type postTest struct {
 	params lift.Params
 }
 
-func (p postTest) Resolve() (status int, response interface{}, err error) {
+func (p postTest) Resolve(ps lift.Params) (status int, response interface{}, err error) {
 	par, _ := (p.params.Body).(*User)
 	response = fmt.Sprintf("%s\n%s\n", par.Name, par.Info.Bio)
 	status = 200

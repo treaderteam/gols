@@ -13,7 +13,7 @@ type CORSResolver interface {
 
 // Resolver performs main logic in request
 type Resolver interface {
-	Resolve() (status int, response interface{}, err error)
+	Resolve(Params) (status int, response interface{}, err error)
 }
 
 // ErrorHandler perform handling server errors and must respond to request
