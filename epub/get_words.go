@@ -12,13 +12,14 @@ func init() {
 	log.SetFlags(log.Lshortfile)
 }
 
-// GetWords from all .html files
+// GetWords from all .html and .xhtml files
 func (b Book) GetWords() (map[string]string, error) {
 	result := make(map[string]string)
 
 	for _, v := range b.Files() {
-		if strings.HasSuffix(v, ".html") {
-			file, err := b.Open(v)
+		if strings.HasSuffix(v, ".html") || strings.HasSuffix(v, ".xhtml") {
+			fname := strings.Replace(v, "OEBPS/", "", 1)
+			file, err := b.Open(fname)
 			if err != nil {
 				log.Println(err)
 				continue

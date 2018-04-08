@@ -115,6 +115,7 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 				responseStatus = 400
 				return
 			}
+			log.Printf("about to write query %s\n", time.Now())
 			(*ps.QueryParams)[v] = value
 		}
 	}
@@ -132,6 +133,7 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 					return
 				}
 			}
+			log.Printf("about to write header %s %s\n", value, time.Now())
 			(*ps.Headers)[v] = value
 		}
 	}
