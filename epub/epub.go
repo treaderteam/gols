@@ -43,6 +43,12 @@ func (p *Book) GetFile(name string) (result []byte, err error) {
 				return
 			}
 			break
+		} else if "OEBPS/"+name == v.Name {
+			file, err = v.Open()
+			if err != nil {
+				return
+			}
+			break
 		}
 	}
 
