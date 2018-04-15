@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/centrypoint/fb2"
+	"gitlab.com/alexnikita/gols/fb2"
 )
 
 func TestParser(t *testing.T) {
