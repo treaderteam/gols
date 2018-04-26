@@ -35,3 +35,11 @@ type Parametrer interface {
 type Logger interface {
 	Log(status *int, method string, url *url.URL, start *time.Time)
 }
+
+// More generic types
+
+// ParamResolver parametrer and resolver
+type ParamResolver interface {
+	Parametrer
+	Resolver
+}

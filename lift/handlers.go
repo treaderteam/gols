@@ -205,8 +205,14 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 		if response == nil {
 			rw.WriteHeader(responseStatus)
 		} else {
-			res = response.([]byte)
-			rw.Write(res)
+			switch response.(type) {
+			case string:
+				res := response.(string)
+				rw.Write([]byte(res))
+			default:
+				res := response.([]byte)
+				rw.Write(res)
+			}
 		}
 	}
 
