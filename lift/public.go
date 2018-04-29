@@ -25,17 +25,17 @@ func NewWithPrefix(prefix string) Instance {
 
 // Params HTTP params
 type Params struct {
-	QueryParams *map[string]string
-	Headers     *map[string]string
+	QueryParams map[string]string
+	Headers     map[string]string
 	Body        interface{}
-	BodyRaw     *io.ReadCloser
+	BodyRaw     io.ReadCloser
 }
 
 // New create new params
 func (p Params) New() Params {
 	return Params{
-		QueryParams: &map[string]string{},
-		Headers:     &map[string]string{},
+		QueryParams: make(map[string]string),
+		Headers:     make(map[string]string),
 		Body:        nil,
 		BodyRaw:     nil,
 	}

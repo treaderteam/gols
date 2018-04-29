@@ -49,7 +49,6 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 	)
 
 	params = params.New()
-
 	responseStatus := 500
 	start := time.Now()
 
@@ -110,33 +109,27 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if ps.QueryParams != nil {
-		for v := range *ps.QueryParams {
-			value := r.URL.Query().Get(v)
-			if len(value) < 1 {
-				err = errors.New("not enough query params")
-				clientError = true
-				responseStatus = 400
-				return
-			}
-			(*params.QueryParams)[v] = value
+		query, e := parseQueryParams(ps.QueryParams, r.URL.Query())
+		if e {
+			clientError = true
+			responseStatus = 400
+			err = errors.New("not enough query params")
+			return
 		}
+
+		params.QueryParams = query
 	}
 
 	if ps.Headers != nil {
-		for v := range *ps.Headers {
-			value := r.Header.Get(v)
-			if len(value) < 1 {
-				v = strings.ToLower(v)
-				value := r.Header.Get(v)
-				if len(value) < 1 {
-					clientError = true
-					responseStatus = 400
-					err = errors.New("not enough headers")
-					return
-				}
-			}
-			(*params.Headers)[v] = value
+		headers, e := parseHeaders(ps.Headers, r.Header)
+		if e {
+			clientError = true
+			responseStatus = 400
+			err = errors.New("not enough headers")
+			return
 		}
+
+		params.Headers = map[string]string(headers)
 	}
 
 	if ps.Body != nil {
@@ -166,8 +159,7 @@ func (ro *Route) serve(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if ps.BodyRaw != nil {
-		br := ps.BodyRaw
-		*br = r.Body
+		params.BodyRaw = r.Body
 	}
 
 	if ro.Resolver != nil {

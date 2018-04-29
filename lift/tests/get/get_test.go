@@ -23,6 +23,7 @@ func TestGetRequest(t *testing.T) {
 	q := getreq.URL.Query()
 	q.Add("payload", testreq)
 	getreq.URL.RawQuery = q.Encode()
+	getreq.Header.Set("Type", "Test")
 
 	log.Println(getreq.URL.RawQuery)
 

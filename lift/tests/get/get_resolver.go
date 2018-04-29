@@ -1,7 +1,7 @@
 package get
 
 import (
-	"log"
+	"errors"
 
 	"gitlab.com/alexnikita/gols/lift"
 )
@@ -10,7 +10,8 @@ import (
 func NewGetResolver() lift.ParamResolver {
 	return getResolver{
 		params: lift.Params{
-			QueryParams: &map[string]string{"payload": ""},
+			QueryParams: map[string]string{"payload": ""},
+			Headers:     map[string]string{"Type": ""},
 		},
 	}
 }
@@ -21,8 +22,11 @@ type getResolver struct {
 
 func (g getResolver) Resolve(params lift.Params) (status int, resp interface{}, err error) {
 	query := params.QueryParams
-	payload := (*query)["payload"]
-	log.Println(payload)
+	payload := query["payload"]
+	typ := params.Headers["Type"]
+	if typ != "Test" {
+		return 400, nil, errors.New("wrong type")
+	}
 	return 200, payload, nil
 }
 
