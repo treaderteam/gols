@@ -17,7 +17,7 @@ func TestRender(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rendered := make([]byte, 0)
+	hrefs := make([]string, 0)
 
 	for _, v := range book.Opf.Spine.Items {
 		href := ""
@@ -27,29 +27,13 @@ func TestRender(t *testing.T) {
 				break
 			}
 		}
-		part, err := book.Render(href)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		rendered = append(rendered, part...)
+		hrefs = append(hrefs, href)
 	}
 
-	head := []byte(`
-		<html>
-			<head>
-				<meta charset='UTF-8'>
-			</head>
-			<body>
-
-	`)
-	foot := []byte(`
-		</body>
-		</html>	
-	`)
-
-	rendered = append(head, rendered...)
-	rendered = append(rendered, foot...)
+	rendered, err := book.RenderMany(hrefs)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// create html file, which contains full book
 	os.Remove("index.html")

@@ -47,6 +47,7 @@ func render(href string, fgetter FileGetter) ([]byte, error) {
 	tags = cutImages(tags)
 
 	result, err = renderImages(tags, file, fgetter)
+	result = appendHeadAndFoot(result)
 
 	return result, err
 }
@@ -162,4 +163,24 @@ func renderImages(tags tagsInfo, file []byte, fgetter FileGetter) ([]byte, error
 	}
 
 	return result, nil
+}
+
+func appendHeadAndFoot(result []byte) []byte {
+	head := []byte(`
+		<html>
+			<head>
+				<meta charset='UTF-8'>
+			</head>
+			<body>
+
+	`)
+	foot := []byte(`
+		</body>
+		</html>	
+	`)
+
+	result = append(head, result...)
+	result = append(result, foot...)
+
+	return result
 }
