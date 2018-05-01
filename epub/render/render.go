@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+const (
+	imgRegex = "\".+(jpe?g|png)\""
+)
+
 // Render embeds all in one html file
 func Render(href string, fgetter FileGetter) ([]byte, error) {
 	return render(href, fgetter)
@@ -115,8 +119,8 @@ func cutBody(tags tagsInfo) tagsInfo {
 
 func cutImages(tags tagsInfo) tagsInfo {
 	result := make(tagsInfo, 0)
-	rex := regexp.MustCompile("(xlink:href=|src=)\".+\\.(jpg)\"")
-	imgRex := regexp.MustCompile("\".+(jpg)\"")
+	rex := regexp.MustCompile("(xlink:href=|src=)\".+\\.(jpe?g|png)\"")
+	imgRex := regexp.MustCompile(imgRegex)
 
 	for _, v := range tags {
 		for _, k := range strings.Split(v.name, " ") {
@@ -137,7 +141,7 @@ func cutImages(tags tagsInfo) tagsInfo {
 
 func renderImages(tags tagsInfo, file []byte, fgetter FileGetter) ([]byte, error) {
 	result := make([]byte, 0)
-	imgRex := regexp.MustCompile("\".+(jpg)\"")
+	imgRex := regexp.MustCompile(imgRegex)
 
 	for _, v := range tags {
 		if v.hasImage {
