@@ -1,7 +1,6 @@
 package epub_test
 
 import (
-	"log"
 	"testing"
 
 	"gitlab.com/alexnikita/gols/epub"
@@ -10,13 +9,13 @@ import (
 func TestOpenEpub(t *testing.T) {
 	var (
 		folder   = "testfiles/"
-		filename = "2"
+		filename = "2.epub"
 	)
 
-	res, err := epub.Open(folder + filename)
+	_, err := epub.Open(folder + filename)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	log.Println(res)
+	// log.Println(res)
 }

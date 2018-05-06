@@ -10,7 +10,7 @@ import (
 )
 
 func TestRender(t *testing.T) {
-	filename := "testfiles/2.epub"
+	filename := "testfiles/3.epub"
 
 	book, err := epub.Open(filename)
 	if err != nil {

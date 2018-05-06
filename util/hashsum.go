@@ -38,3 +38,17 @@ func HashAndVerify(file []byte, hash string) (bool, error) {
 
 	return hash == hash1, nil
 }
+
+// Hash hashes given byte array
+func Hash(file []byte) (string, error) {
+	sh := sha512.New()
+
+	if _, err := io.Copy(sh, bytes.NewReader(file)); err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	hash1 := fmt.Sprintf("%x", sh.Sum(nil))
+
+	return hash1, nil
+}
