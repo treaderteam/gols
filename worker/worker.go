@@ -7,7 +7,7 @@ import (
 )
 
 // IntervalWorker is daemon, which
-// trigger specified function once in
+// trigger given function once in
 // specified interval
 type IntervalWorker intervalWorker
 

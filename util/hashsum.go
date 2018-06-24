@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-// VerifyHashsum func
+// VerifyHashsum verifies sha512 hash sum of two byte arrays
 func VerifyHashsum(file1, file2 []byte) (bool, error) {
 	sh1, sh2 := sha512.New(), sha512.New()
 
